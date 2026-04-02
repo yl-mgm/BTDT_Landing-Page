@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BTDT Prototype</title>
+  <style>
+    :root {
+      --bg: #F5F3EF;
+      --surface: #FBFAF7;
+      --surface-2: #F1EEE8;
+      --text: #2B2A28;
+      --muted: #7A766F;
+      --accent: #8FA79A;
+      --accent-dark: #6F877C;
+      --warm: #C4A484;
+      --border: #E6E2DB;
+      --shadow: 0 14px 34px rgba(43, 42, 40, 0.05);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    a { color: inherit; }
+
+    .container {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(12px);
+      background: rgba(245, 243, 239, 0.88);
+      border-bottom: 1px solid rgba(230, 226, 219, 0.8);
+    }
+
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 0;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--accent-dark);
+      font-weight: 700;
+      box-shadow: 0 8px 20px rgba(43, 42, 40, 0.04);
+      flex-shrink: 0;
+    }
+
+    .brand-copy {
+      min-width: 0;
+    }
+
+    .brand-copy strong {
+      display: block;
+      letter-spacing: 0.01em;
+    }
+
+    .brand-copy span {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-links a,
+    .tab-btn,
+    .chip-btn,
+    .btn {
+      border: 0;
+      cursor: pointer;
+      text-decoration: none;
+      font: inherit;
+      transition: 0.2s ease;
+    }
+
+    .nav-links a,
+    .tab-btn {
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: transparent;
+    }
+
+    .nav-links a:hover,
+    .tab-btn:hover,
+    .tab-btn.active {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .page {
+      display: none;
+      padding: 34px 0 56px;
+      min-height: calc(100vh - 85px);
+    }
+
+    .page.active { display: block; }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+    }
+
+    .panel.soft {
+      background: var(--surface-2);
+      box-shadow: none;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 26px;
+      align-items: start;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(143, 167, 154, 0.14);
+      color: var(--accent-dark);
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    h1, h2, h3, h4, p { margin-top: 0; }
+
+    h1 {
+      font-size: clamp(36px, 5vw, 64px);
+      line-height: 1.06;
+      margin-bottom: 18px;
+      letter-spacing: -0.035em;
+      font-weight: 650;
+      max-width: 12ch;
+    }
+
+    .subhead {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 58ch;
+      margin-bottom: 24px;
+    }
+
+    .hero-actions,
+    .button-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 20px;
+      border-radius: 999px;
+      font-size: 15px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 10px 24px rgba(111, 135, 124, 0.22);
+    }
+
+    .btn-primary:hover { background: var(--accent-dark); }
+
+    .btn-secondary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .microcopy,
+    .muted {
+      color: var(--muted);
+    }
+
+    .microcopy { font-size: 14px; }
+
+    .card-pad { padding: 24px; }
+
+    .match-card {
+      display: grid;
+      gap: 18px;
+    }
+
+    .match-top,
+    .row-between {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .match-pill,
+    .chip,
+    .tiny-pill {
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .match-pill {
+      background: rgba(143, 167, 154, 0.16);
+      color: var(--accent-dark);
+      padding: 8px 10px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .chip-wrap,
+    .tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chip,
+    .tag,
+    .chip-btn {
+      font-size: 12px;
+      padding: 8px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #F7F5F1;
+      color: var(--text);
+    }
+
+    .chip-btn.active {
+      background: rgba(143, 167, 154, 0.18);
+      border-color: #c8d4ce;
+      color: var(--accent-dark);
+    }
+
+    .quote {
+      font-size: 16px;
+      padding: 16px;
+      border-left: 3px solid var(--warm);
+      background: #F7F3EC;
+      border-radius: var(--radius-md);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .section {
+      margin-top: 20px;
+    }
+
+    .section h2 {
+      font-size: clamp(28px, 3vw, 40px);
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
+    }
+
+    .section-intro {
+      font-size: 17px;
+      color: var(--muted);
+      max-width: 700px;
+      margin-bottom: 18px;
+    }
+
+    .truth-box p {
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+
+    .step-num {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: rgba(143, 167, 154, 0.16);
+      color: var(--accent-dark);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .step-card h3,
+    .mini-card h3,
+    .upload-card h3,
+    .story-item h4 {
+      margin-bottom: 8px;
+    }
+
+    .demo-shell {
+      border-radius: 34px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, #faf8f4 0%, #f5f3ef 100%);
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .mini-card,
+    .story-item,
+    .upload-card,
+    .chat-shell,
+    .field,
+    .path-card {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+    }
+
+    .story-list,
+    .match-list,
+    .conversation-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .upload-box {
+      border: 1.5px dashed #c8c2b9;
+      background: #f8f5f0;
+      border-radius: var(--radius-lg);
+      padding: 26px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .input-like,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 16px;
+      padding: 14px 15px;
+      color: var(--text);
+      font: inherit;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .match-list .path-card {
+      display: grid;
+      gap: 14px;
+    }
+
+    .why-list,
+    .bullet-list {
+      padding-left: 18px;
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .story-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .story-item small {
+      display: block;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 11px;
+    }
+
+    .story-item p:last-child,
+    .mini-card p:last-child,
+    .path-card p:last-child,
+    .upload-card p:last-child,
+    .truth-box p:last-child {
+      margin-bottom: 0;
+    }
+
+    .chat-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 18px;
+    }
+
+    .chat-sidebar {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .conversation-item {
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: #f8f5f0;
+    }
+
+    .conversation-item.active {
+      background: rgba(143, 167, 154, 0.12);
+      border-color: #cbd6d0;
+    }
+
+    .chat-shell {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      background: #f8f5f0;
+    }
+
+    .chat-preview {
+      display: grid;
+      gap: 12px;
+      padding: 20px;
+      background: linear-gradient(180deg, #fbfaf7 0%, #f5f3ef 100%);
+    }
+
+    .bubble {
+      max-width: 86%;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: #F7F5F1;
+    }
+
+    .bubble.guide {
+      background: #EEF3F0;
+      margin-left: auto;
+      border-color: #D5E0DA;
+    }
+
+    .prompt-bar {
+      padding: 0 20px 16px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .composer {
+      margin: 0 20px 20px;
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: white;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .composer span { color: var(--muted); }
+
+    .kicker {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .footer-cta {
+      margin-top: 24px;
+      text-align: center;
+    }
+
+    .footer-cta .panel {
+      padding: 34px;
+    }
+
+    .footer-cta h2 {
+      margin-bottom: 10px;
+    }
+
+    .canva-note {
+      margin-top: 18px;
+      background: #f8f5f0;
+      border: 1px dashed #d4cec3;
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .grid-2,
+      .grid-3,
+      .story-grid,
+      .chat-layout {
+        grid-template-columns: 1fr;
+      }
+
+      h1 { max-width: none; }
+      .nav-inner { align-items: flex-start; flex-direction: column; }
+      .nav-links { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <div class="brand">
+        <div class="logo">BTDT</div>
+        <div class="brand-copy">
+          <strong>Been There, Doing That</strong>
+          <span>real paths, real patterns</span>
+        </div>
+      </div>
+      <div class="nav-links">
+        <button class="tab-btn active" data-page="home">Homepage</button>
+        <button class="tab-btn" data-page="onboarding">Onboarding</button>
+        <button class="tab-btn" data-page="prototype">Prototype</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section class="page active" id="page-home">
+      <div class="hero">
+        <div>
+          <div class="eyebrow">for job search clarity through lived experience</div>
+          <h1>You don’t have to figure this out on your own. You just need to hear from someone who’s already been through it.</h1>
+          <p class="subhead">Find someone who’s been through almost the exact same thing — and see what actually helped.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#" data-open-page="prototype">Find your predecessor</a>
+            <a class="btn btn-secondary" href="#" data-open-page="prototype">Explore what they went through</a>
+          </div>
+          <div class="microcopy">No scripts. No generic advice.</div>
+        </div>
+
+        <aside class="panel card-pad match-card">
+          <div class="match-top">
+            <div>
+              <div style="font-weight:700; font-size:20px;">Alex — Product Manager</div>
+              <div class="muted">similar path in timing, transitions, and key decisions</div>
+            </div>
+            <div class="match-pill">91% match</div>
+          </div>
+
+          <div>
+            <div style="font-weight:650; margin-bottom:8px;">Why you match</div>
+            <div class="tags">
+              <span class="tag">nonlinear path</span>
+              <span class="tag">transition-heavy</span>
+              <span class="tag">broad scope</span>
+              <span class="tag">ownership</span>
+            </div>
+          </div>
+
+          <div class="quote">“At first, I thought I needed to change everything. What actually helped was noticing what stayed consistent.”</div>
+
+          <div class="button-row">
+            <a class="btn btn-primary" href="#" data-open-page="prototype">See their full path</a>
+            <a class="btn btn-secondary" href="#" data-open-page="prototype">Start with chat</a>
+          </div>
+        </aside>
+      </div>
+
+      <div class="section grid-2">
+        <div class="panel card-pad truth-box">
+          <p>You’ve probably already tried to make sense of this.</p>
+          <p class="muted">Read things. Asked around. Thought it through more times than you can count.</p>
+        </div>
+        <div class="panel card-pad truth-box">
+          <p>And still, something doesn’t fully click.</p>
+          <p class="muted">Not because you’re missing effort. Because it’s hard to find someone who’s been through your version of this.</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>How it works</h2>
+        <p class="section-intro">Start with your resume or your own words. BTDT reflects the patterns in your path, then matches you with someone whose trajectory overlaps in the ways that matter.</p>
+        <div class="grid-3">
+          <div class="panel card-pad step-card">
+            <div class="step-num">1</div>
+            <h3>Start from where you are</h3>
+            <p class="muted">Upload your resume or describe your situation. BTDT surfaces strengths, patterns, and relevant tags.</p>
+          </div>
+          <div class="panel card-pad step-card">
+            <div class="step-num">2</div>
+            <h3>See who overlaps</h3>
+            <p class="muted">Get matched with people whose paths feel pattern-level similar, not just close on paper.</p>
+          </div>
+          <div class="panel card-pad step-card">
+            <div class="step-num">3</div>
+            <h3>Enter through the story</h3>
+            <p class="muted">Read their path in segments, then ask about the exact part you want to understand more deeply.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section grid-2">
+        <div>
+          <h2>What you get isn’t advice</h2>
+          <p class="section-intro">It’s a look into what actually happened: what they focused on, what didn’t work, and what changed the shape of the process.</p>
+          <div class="story-list">
+            <div class="story-item">
+              <small>What it felt like at the beginning</small>
+              <p>I thought I needed to fix everything at once, which made every setback feel bigger than it was.</p>
+            </div>
+            <div class="story-item">
+              <small>What I thought was the problem</small>
+              <p>I assumed the issue was my experience, when really the signal was in how inconsistently I was framing it.</p>
+            </div>
+            <div class="story-item">
+              <small>What changed</small>
+              <p>I stopped reacting to every outcome and started paying attention to what stayed true across attempts.</p>
+            </div>
+          </div>
+        </div>
+        <div class="panel card-pad">
+          <div class="kicker">story-first chat preview</div>
+          <h3 style="font-size:30px; letter-spacing:-0.03em;">No cold intros. No coffee-chat anxiety.</h3>
+          <p class="muted">Start from the exact part of their story you want to understand.</p>
+          <div class="chat-preview" style="padding:0; background:none;">
+            <div class="bubble">I was reading the part where you said you kept changing your approach. What made you realize that wasn’t helping?</div>
+            <div class="bubble guide">Honestly, I noticed I was optimizing every detail without knowing which detail actually mattered. Once I looked for patterns instead of reactions, things got clearer.</div>
+            <div class="bubble">What did you start paying attention to instead?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-cta">
+        <div class="panel">
+          <h2 style="font-size:36px; letter-spacing:-0.03em;">Talk to someone who’s been there.</h2>
+          <p class="muted" style="max-width:560px; margin:0 auto 20px;">Real paths. Real patterns. Real outcomes.</p>
+          <div class="button-row" style="justify-content:center;">
+            <a class="btn btn-primary" href="#" data-open-page="prototype">Find your predecessor</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="canva-note">
+        <strong>Canva-friendly structure:</strong> this homepage uses stacked sections, rounded cards, simple buttons, and light text hierarchy — exactly the kind of layout that can be rebuilt later inside Canva Websites without needing complex app logic.
+      </div>
+    </section>
+
+    <section class="page" id="page-onboarding">
+      <div class="section">
+        <div class="row-between" style="margin-bottom:14px; align-items:end;">
+          <div>
+            <div class="eyebrow">onboarding flow</div>
+            <h2>Start from where you are</h2>
+            <p class="section-intro">This mock shows the resume-first path and the reflection screen that helps users feel understood before matching starts.</p>
+          </div>
+          <div class="button-row">
+            <button class="btn btn-secondary" data-open-page="home">Back to homepage</button>
+            <button class="btn btn-primary" data-open-page="prototype">Open full prototype</button>
+          </div>
+        </div>
+
+        <div class="demo-shell">
+          <div class="tabs">
+            <button class="tab-btn active" data-demo="entry">1. Entry</button>
+            <button class="tab-btn" data-demo="upload">2. Resume upload</button>
+            <button class="tab-btn" data-demo="reflection">3. AI reflection</button>
+          </div>
+
+          <div class="demo-panel" id="demo-entry">
+            <div class="grid-2">
+              <div class="upload-card">
+                <div class="kicker">option 1</div>
+                <h3>Describe your situation</h3>
+                <p class="muted">Write it in your own words if that feels easiest.</p>
+                <div class="input-like">I’ve been trying to make sense of what direction to focus on next...</div>
+              </div>
+              <div class="upload-card" style="border-color:#d5e0da; background:#f5f8f6;">
+                <div class="kicker">option 2</div>
+                <h3>Upload your resume</h3>
+                <p class="muted">We’ll help identify patterns, strengths, and story threads that stand out.</p>
+                <div class="upload-box">Drop PDF here or paste resume text</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-panel" id="demo-upload" style="display:none;">
+            <div class="upload-card">
+              <h3>Upload your resume</h3>
+              <p class="muted">We’ll look for patterns in your path. Nothing gets shared without you.</p>
+              <div class="upload-box">Resume.pdf uploaded</div>
+              <div style="height:14px"></div>
+              <label class="kicker">or paste resume text</label>
+              <textarea>Product Manager with experience leading cross-functional teams, navigating ambiguous product areas, and owning launches across startup and mid-size environments...</textarea>
+              <div style="height:14px"></div>
+              <button class="btn btn-primary">Continue</button>
+            </div>
+          </div>
+
+          <div class="demo-panel" id="demo-reflection" style="display:none;">
+            <div class="grid-2">
+              <div class="upload-card">
+                <h3>Here’s what stands out in your path</h3>
+                <p class="muted">Keep what fits. Adjust what doesn’t.</p>
+
+                <div class="kicker">strengths that show up</div>
+                <div class="chip-wrap">
+                  <span class="chip">adaptability</span>
+                  <span class="chip">ownership in ambiguity</span>
+                  <span class="chip">cross-functional communication</span>
+                </div>
+
+                <div style="height:16px"></div>
+                <div class="kicker">patterns we notice</div>
+                <div class="chip-wrap">
+                  <span class="chip">nonlinear trajectory</span>
+                  <span class="chip">transition-heavy roles</span>
+                  <span class="chip">broad scope</span>
+                </div>
+
+                <div style="height:16px"></div>
+                <div class="kicker">suggested tags</div>
+                <div class="chip-wrap">
+                  <button class="chip-btn active">ambiguity</button>
+                  <button class="chip-btn active">transitions</button>
+                  <button class="chip-btn active">ownership</button>
+                  <button class="chip-btn active">communication</button>
+                  <button class="chip-btn">exploration</button>
+                </div>
+              </div>
+
+              <div class="upload-card soft">
+                <div class="kicker">reflection summary</div>
+                <p>Your path suggests someone who tends to operate well in changing environments, especially where clarity, coordination, and adaptability matter. There is range in your experience, which can become easier to understand once it is framed around the kinds of situations you consistently step into.</p>
+                <div style="height:16px"></div>
+                <button class="btn btn-primary" data-open-page="prototype">This feels right</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="canva-note">
+        <strong>Canva-friendly note:</strong> this onboarding can be split into separate Canva website sections or separate pages. The visual part translates well. The AI upload and matching logic would still need Bubble, Webflow + forms, or another app tool behind the scenes.
+      </div>
+    </section>
+
+    <section class="page" id="page-prototype">
+      <div class="row-between" style="margin-bottom:14px; align-items:end;">
+        <div>
+          <div class="eyebrow">multi-page prototype</div>
+          <h2>Match → full path → story-first chat</h2>
+          <p class="section-intro">This is the product flow after onboarding. It shows the experience a seeker would actually move through.</p>
+        </div>
+        <div class="button-row">
+          <button class="btn btn-secondary" data-open-page="home">Homepage</button>
+          <button class="btn btn-secondary" data-open-page="onboarding">Onboarding</button>
+        </div>
+      </div>
+
+      <div class="grid-3" style="grid-template-columns: 0.95fr 1.05fr 1fr; align-items:start;">
+        <div class="path-card">
+          <div class="kicker">screen 1</div>
+          <h3>Match results</h3>
+          <div class="match-list">
+            <div class="path-card soft">
+              <div class="row-between">
+                <div>
+                  <strong>Alex — Product Manager</strong>
+                  <div class="muted">91% match</div>
+                </div>
+                <span class="tiny-pill chip">best fit</span>
+              </div>
+              <ul class="why-list">
+                <li>similar transitions</li>
+                <li>similar timing</li>
+                <li>similar uncertainty pattern</li>
+              </ul>
+              <p class="quote">“What helped wasn’t changing everything. It was noticing what stayed consistent.”</p>
+              <button class="btn btn-primary" style="width:100%;">See their path</button>
+            </div>
+            <div class="path-card soft">
+              <div class="row-between">
+                <div>
+                  <strong>Maya — Designer</strong>
+                  <div class="muted">87% match</div>
+                </div>
+              </div>
+              <p class="muted">Strong overlap in storytelling, final-stage friction, and broad experience.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="path-card">
+          <div class="kicker">screen 2</div>
+          <h3>Full path page</h3>
+          <div class="match-top" style="margin-bottom:14px;">
+            <div>
+              <strong style="font-size:18px;">Alex — Product Manager</strong>
+              <div class="muted">91% trajectory match</div>
+            </div>
+            <span class="match-pill">pattern-level similar</span>
+          </div>
+          <div class="story-list">
+            <div class="story-item">
+              <small>What it felt like at the beginning</small>
+              <p>I thought I needed to fix everything at once, which made each setback feel larger than it was.</p>
+              <button class="btn btn-secondary">Ask about this</button>
+            </div>
+            <div class="story-item">
+              <small>What didn’t work</small>
+              <p>I kept overcorrecting after every outcome, which made my process more inconsistent.</p>
+              <button class="btn btn-secondary">Ask about this</button>
+            </div>
+            <div class="story-item">
+              <small>What changed</small>
+              <p>I started looking for the pattern across attempts instead of reacting to each one in isolation.</p>
+              <button class="btn btn-secondary">Ask about this</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="path-card">
+          <div class="kicker">screen 3</div>
+          <h3>Chat entry</h3>
+          <div class="chat-preview" style="padding:0; background:none;">
+            <div class="bubble">I was reading the part where you said you kept overcorrecting. What made you realize that was part of the problem?</div>
+            <div class="bubble guide">I noticed I was changing too many variables at once, so I couldn’t actually tell what was helping and what wasn’t.</div>
+          </div>
+          <div style="height:14px"></div>
+          <div class="prompt-bar" style="padding:0;">
+            <button class="chip-btn active">What changed for you?</button>
+            <button class="chip-btn">What mattered less?</button>
+            <button class="chip-btn">What were you missing early on?</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section chat-layout">
+        <aside class="chat-sidebar">
+          <div class="panel card-pad">
+            <div class="kicker">inbox</div>
+            <div class="conversation-list">
+              <div class="conversation-item active">
+                <strong>Alex</strong>
+                <div class="muted">Ask about: what changed</div>
+              </div>
+              <div class="conversation-item">
+                <strong>Maya</strong>
+                <div class="muted">Ask about: storytelling shift</div>
+              </div>
+            </div>
+          </div>
+          <div class="panel card-pad soft">
+            <div class="kicker">sound settings</div>
+            <p style="margin-bottom:10px;">Background sound: <strong>Rain room</strong></p>
+            <p style="margin-bottom:0;">Chat alert: <strong>Soft chime</strong></p>
+          </div>
+        </aside>
+
+        <div class="chat-shell">
+          <div class="chat-header">
+            <div class="row-between">
+              <div>
+                <strong>Chat with Alex</strong>
+                <div class="muted">story-first conversation · anonymous by default</div>
+              </div>
+              <span class="match-pill">91% match</span>
+            </div>
+          </div>
+          <div class="chat-preview">
+            <div class="bubble">I was reading the part where you said you kept changing your approach. What made you realize that wasn’t helping?</div>
+            <div class="bubble guide">Honestly, I noticed I was optimizing every detail without knowing which detail actually mattered.</div>
+            <div class="bubble guide">Once I looked for patterns instead of reactions, things started to get clearer.</div>
+            <div class="bubble">What did you start paying attention to instead?</div>
+          </div>
+          <div class="prompt-bar">
+            <button class="chip-btn active">Ask what changed</button>
+            <button class="chip-btn">Ask what didn’t matter</button>
+            <button class="chip-btn">Ask what you might be overlooking</button>
+          </div>
+          <div class="composer">
+            <span>Ask about what changed, what didn’t work, or what mattered most...</span>
+            <button class="btn btn-primary">Send</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="canva-note">
+        <strong>About Canva as your website tool:</strong> yes, you can eventually use Canva Websites for the marketing site — homepage, brand story, explainer sections, and static mockups. But the real product pieces like resume upload, AI reflection, matching, accounts, and chat will need a real app builder behind them. The cleanest split is <strong>Canva for marketing front-end</strong> and <strong>Bubble for product/app</strong>.
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const navButtons = document.querySelectorAll('[data-page]');
+    const pages = {
+      home: document.getElementById('page-home'),
+      onboarding: document.getElementById('page-onboarding'),
+      prototype: document.getElementById('page-prototype')
+    };
+
+    function openPage(pageName) {
+      Object.entries(pages).forEach(([key, page]) => {
+        page.classList.toggle('active', key === pageName);
+      });
+      navButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.page === pageName));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => openPage(btn.dataset.page));
+    });
+
+    document.querySelectorAll('[data-open-page]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openPage(btn.dataset.openPage);
+      });
+    });
+
+    const demoButtons = document.querySelectorAll('[data-demo]');
+    const demoPanels = {
+      entry: document.getElementById('demo-entry'),
+      upload: document.getElementById('demo-upload'),
+      reflection: document.getElementById('demo-reflection')
+    };
+
+    function openDemo(name) {
+      Object.entries(demoPanels).forEach(([key, panel]) => {
+        panel.style.display = key === name ? 'block' : 'none';
+      });
+      demoButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.demo === name));
+    }
+
+    demoButtons.forEach(btn => {
+      btn.addEventListener('click', () => openDemo(btn.dataset.demo));
+    });
+  </script>
+</body>
+</html>
